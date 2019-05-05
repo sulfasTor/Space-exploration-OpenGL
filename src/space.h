@@ -1,6 +1,7 @@
 #ifndef __SPACE_H__
 #define __SPACE_H__
-#include "window.h"
+
+#include "common.h"
 
 typedef struct {
   GLuint radius;
@@ -9,6 +10,11 @@ typedef struct {
 
 } t_star;
 
-t_star generate_star (t_star*,GLuint);
+extern GLuint _space_radius;
+extern GLuint _space_tex_id;
+
+//t_star generate_star (t_star*, GLuint);
+void generate_space ();
+void draw_space ();
 
 #endif
