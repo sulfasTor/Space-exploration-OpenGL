@@ -11,7 +11,7 @@ MKDIR = mkdir
 CHMOD = chmod
 CP = rsync -R
 # déclaration des options du compilateur
-CFLAGS = -Wall -Wextra -Werror -O3
+CFLAGS = -g -Wall -Wextra -Werror -O3
 CPPFLAGS = -I.
 LDFLAGS = -lm
 # définition des fichiers et dossiers

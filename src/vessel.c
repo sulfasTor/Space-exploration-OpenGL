@@ -10,10 +10,11 @@ GLfloat _vessel_data[] =
 GLuint _vessel_vao_id = 0;
 GLuint _vessel_vbo_id = 0;
 GLuint _vessel_tex_id = 0;
+GLuint _space_radius;
 
 void generate_vessel ()
 {
-  GLuint vessel_tex[] = {(255 << 24) + 255};
+  GLuint vessel_tex[] = {(255 << 16) + 255};
   
   glGenVertexArrays(1, &_vessel_vao_id);
   glBindVertexArray(_vessel_vao_id);
@@ -36,12 +37,11 @@ void generate_vessel ()
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void draw_vessel (cam_t cam)
+void draw_vessel ()
 {
-  //glUseProgram(_vessel_program_id);
   gl4duBindMatrix("modelMatrix");
   gl4duPushMatrix(); {
-    gl4duTranslatef(0.0, 2.0, cam.z - 5.0f);
+    gl4duTranslatef(_look_at.x, _look_at.y, _look_at.z);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glActiveTexture(GL_TEXTURE0);
@@ -50,7 +50,15 @@ void draw_vessel (cam_t cam)
   glBindVertexArray(_vessel_vao_id);
   glDrawArrays(GL_TRIANGLES, 0, 4);
   glBindVertexArray(0);
-  //gl4dgDraw(_sphere);
   gl4duBindMatrix(0);
-  //glUseProgram(0);
+}
+
+void clean_vessel ()
+{
+  if(_vessel_vao_id)
+    glDeleteVertexArrays(1, &_vessel_vao_id);
+  if(_vessel_vbo_id)
+    glDeleteBuffers(1, &_vessel_vbo_id);
+  if(_vessel_tex_id)
+    glDeleteTextures(1, &_vessel_tex_id);
 }

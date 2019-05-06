@@ -8,11 +8,14 @@
 
 typedef struct {
   GLfloat x, y, z;
-  GLfloat theta;
-} cam_t;
+} vector_t;
 
 extern GLuint _pId;
 extern GLuint _sphere;
-extern cam_t _cam;
+extern GLuint _cube;
+extern GLuint _plane;
+extern vector_t _cam;
+extern vector_t _look_at;
+extern vector_t _up;
 
 #endif /* __COMMON_H__ */

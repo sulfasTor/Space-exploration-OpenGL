@@ -2,3 +2,5 @@ game
 *.org
 *.o
 src/*.o
+quaternion/
+images/
