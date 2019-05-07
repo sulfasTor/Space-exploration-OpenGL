@@ -9,16 +9,16 @@
 #include "common.h"
 #include "space.h"
 #include "vessel.h"
-#include "quaternion.h"
 
 enum e_keys {
 	     KLEFT = 0,
  	     KRIGHT,
 	     KUP,
-	     KDOWN
+	     KDOWN,
+	     KWARP
 };
 
-static GLuint _keys[] = {0, 0, 0, 0};
+static GLuint _keys[] = {0, 0, 0, 0, 0};
 static int _wW = 1000, _wH = 800;
 static int _xm = 500, _ym = 500;
 static int _xm_last = 500, _ym_last = 500;
@@ -26,8 +26,9 @@ static int _xm_last = 500, _ym_last = 500;
 GLuint _pId = 0;
 GLuint _sphere = 0;
 GLuint _plane = 0;
+GLuint _torus = 0;
 GLuint _cube = 0;
-vector_t _cam = {0, 0, 0};
+vector_t _cam = {300, 1000, 300};
 
 static GLfloat _pitch = 0.0;
 static GLfloat _yaw = 0.0;
@@ -94,6 +95,7 @@ void init_data ()
   _sphere = gl4dgGenSpheref (30, 30);
   _cube = gl4dgGenCubef();
   _plane = gl4dgGenGrid2df (_space_radius, _space_radius);
+  _torus = gl4dgGenTorusf(30, 30, 1);
 
   srand (time (0)); 
   generate_space ();
@@ -109,7 +111,7 @@ void resize (int w, int h)
   glViewport (0, 0, _wW, _wH);
   gl4duBindMatrix ("projectionMatrix");
   gl4duLoadIdentityf ();
-  gl4duFrustumf(-1.0, 1.0, -1.0 * _wH / (float) _wW, 1.0 * _wH / (float)_wW, 1.0, _space_radius * _space_radius);
+  gl4duFrustumf(-1.0, 1.0, -1.0 * _wH / (float) _wW, 1.0 * _wH / (float)_wW, 1.0, 2.0f * _space_radius * _space_radius + 1.0);
 }
 
 void quit (void)
@@ -121,7 +123,7 @@ void quit (void)
 
 void draw (void)
 {
-  /* printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z); */
+  //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
   /* printf ("U %f %f %f\n", _up.x, _up.y, _up.z); */
   /* printf ("R %f %f %f\n", _right.x, _right.y, _right.z); */
@@ -173,6 +175,9 @@ void keydown(int keycode) {
   case 's':
     _keys[KDOWN] = 1;
     break;
+  case 'h':
+    _keys[KWARP] = 1;
+    break;
   case GL4DK_ESCAPE:
   case 'x':
     exit(0);
@@ -206,45 +211,51 @@ void keyup(int keycode) {
   case 's':
     _keys[KDOWN] = 0;
     break;
+  case 'h':
+    _keys[KWARP] = 0;
+    break;
   default:
     break;
   }
 }
 
-void rotate (vector_t v, GLfloat angle)
-{
-  quaternion_t q = get_quaternion_from_axis (v.x, v.y, v.z, angle);
-  quaternion_t qv = (quaternion_t) {_look_at.x, _look_at.y, _look_at.z, 0};
-  conjugate (&q);
-  quaternion_t res = mult (mult (q, qv), q);
-
-  _look_at.x = res.x;
-  _look_at.y = res.y;
-  _look_at.z = res.z;
-}
-
 void idle(void) {
-  GLfloat speed = 1.0;
+  static GLfloat speed = 1.0;
   double dt, dtheta = M_PI;
   static double t0 = 0, t;
+  GLboolean modified = 0;
   dt = ((t = gl4dGetElapsedTime()) - t0) / 1000.0;
   t0 = t;
+  
+  if(_keys[KWARP])
+    {
+      speed = 1000.0;
+      gl4duBindMatrix ("projectionMatrix");
+      gl4duLoadIdentityf ();
+      gl4duFrustumf(-5.5, 5.0, -5.0 * _wH / (float) _wW, 5.0 * _wH / (float)_wW, 1.0, 2.0f * _space_radius * _space_radius + 1);
+      gl4duBindMatrix (0);
+      modified = 1;
+    }
+  else
+    resize(_wW, _wH);
 
   if(_keys[KLEFT])
-    {
       roll (dt * dtheta);
-      return;
-    }
   if(_keys[KRIGHT])
-    {
       roll (-dt * dtheta);
-      return;
-    }
   if(_keys[KUP])
-    speed = 5.0;
+    {
+      //if (speed < 50.0)
+      speed += 10.0;
+      modified = 1;
+    }  
   if(_keys[KDOWN])
-    speed = -5.0;
-
+    {
+      speed += -10.0;
+      modified = 1;
+    }
+  if (!modified)
+    speed = 10.0;
   pitch_and_yaw ();
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
@@ -268,7 +279,7 @@ void pitch_and_yaw ()
 
   x_offset = _xm - _xm_last;
   y_offset = _ym - _ym_last;
-  _xm = _xm_last; 
+  _xm = _xm_last;
   _ym = _ym_last;
 
   x_offset *= _msensitivity;
@@ -276,8 +287,6 @@ void pitch_and_yaw ()
 
   _yaw += x_offset;
   _pitch -= y_offset;
-  
-  printf ("yaw = %f, pitch = %f\n", _yaw, _pitch);
   
   if (_pitch >= 90.0f)
     _pitch = 89.0f;
@@ -289,8 +298,8 @@ void pitch_and_yaw ()
   _look_at.x = cos(_yaw) * cos(_pitch);
   normalize (&_look_at);
   
-  vector_t up_y = (vector_t) {0.0f,1.0f,0.0f};
-  _right = cross_product (_look_at, up_y);
+  //vector_t up_y = (vector_t) {0.0f,1.0f,0.0f};
+  _right = cross_product (_look_at, _up);
   normalize (&_right);
   
   _up = cross_product (_right, _look_at);

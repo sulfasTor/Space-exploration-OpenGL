@@ -41,7 +41,9 @@ void draw_vessel ()
 {
   gl4duBindMatrix("modelMatrix");
   gl4duPushMatrix(); {
-    gl4duTranslatef(_look_at.x, _look_at.y, _look_at.z);
+    gl4duRotatef(-90, 0, 1, 0);
+    gl4duScalef(1000, 1000, 1000);
+    gl4duTranslatef(_cam.x,-_cam.y,_cam.z);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glActiveTexture(GL_TEXTURE0);

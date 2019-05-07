@@ -6,18 +6,19 @@
 
 typedef struct {
   GLuint radius;
-  GLuint x, y, z;
+  GLfloat x, y, z;
 
 } t_star;
 
 typedef struct {
   GLuint radius;
-  GLuint x, y, z;
+  GLfloat x, y, z;
+  GLfloat speed;
   GLfloat health;
 
 } t_ovni;
 
-extern const GLuint _space_radius;
+extern const GLint _space_radius;
 extern GLuint _star_tex_id;
 extern GLuint _ovni_tex_id;
 extern GLuint _space_tex_id;
