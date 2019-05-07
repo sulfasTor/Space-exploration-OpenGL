@@ -19,8 +19,8 @@ enum e_keys {
 };
 
 static GLuint _keys[] = {0, 0, 0, 0, 0};
-static int _wW = 1000, _wH = 800;
-static int _xm = 500, _ym = 500;
+int _wW = 1000, _wH = 800;
+int _xm = 500, _ym = 500;
 static int _xm_last = 500, _ym_last = 500;
 
 GLuint _pId = 0;
@@ -28,16 +28,17 @@ GLuint _sphere = 0;
 GLuint _plane = 0;
 GLuint _torus = 0;
 GLuint _cube = 0;
-vector_t _cam = {300, 1000, 300};
+vector_t _cam = {0, 0, -4000};
 
-static GLfloat _pitch = 0.0;
-static GLfloat _yaw = 0.0;
-static GLfloat _roll = 0.0;
+GLfloat _pitch = 0.0;
+GLfloat _yaw = 0.0;
+GLfloat _roll = 0.0;
 static GLfloat _msensitivity = 0.00005;
+static GLfloat _bound = 70000;
 
-vector_t _look_at = {0, 0, -1};
+vector_t _look_at = {0, 0, 1};
 vector_t _up = {0, 1, 0};
-vector_t _right = {-1, 0, 0};
+vector_t _right = {1, 0, 0};
 
 /* Forward declarations */
 
@@ -94,7 +95,7 @@ void init_data ()
 {
   _sphere = gl4dgGenSpheref (30, 30);
   _cube = gl4dgGenCubef();
-  _plane = gl4dgGenGrid2df (_space_radius, _space_radius);
+  _plane = gl4dgGenQuadf ();
   _torus = gl4dgGenTorusf(30, 30, 1);
 
   srand (time (0)); 
@@ -125,7 +126,7 @@ void draw (void)
 {
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
-  /* printf ("U %f %f %f\n", _up.x, _up.y, _up.z); */
+  printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
   /* printf ("R %f %f %f\n", _right.x, _right.y, _right.z); */
   /* printf ("##############################################\n"); */
   
@@ -220,13 +221,14 @@ void keyup(int keycode) {
 }
 
 void idle(void) {
+  GLboolean modified = 0;
   static GLfloat speed = 1.0;
   double dt, dtheta = M_PI;
   static double t0 = 0, t;
-  GLboolean modified = 0;
   dt = ((t = gl4dGetElapsedTime()) - t0) / 1000.0;
   t0 = t;
-  
+
+  printf ("#########idle\n");
   if(_keys[KWARP])
     {
       speed = 1000.0;
@@ -260,6 +262,13 @@ void idle(void) {
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
   _cam.z += _look_at.z * speed;
+  
+  if (fabs(_cam.x) >= _bound || fabs(_cam.x) >= _bound || fabs(_cam.x) >= _bound)
+    {
+      _cam.x = 0.0;
+      _cam.y = 0.0;
+      _cam.z = 0.0;
+    }
 }
 
 vector_t cross_product(vector_t a, vector_t b)
@@ -278,21 +287,16 @@ void pitch_and_yaw ()
   GLfloat x_offset, y_offset;
 
   x_offset = _xm - _xm_last;
-  y_offset = _ym - _ym_last;
+  y_offset = _ym_last - _ym;
   _xm = _xm_last;
   _ym = _ym_last;
-
+    
   x_offset *= _msensitivity;
   y_offset *= _msensitivity;
 
   _yaw += x_offset;
-  _pitch -= y_offset;
-  
-  if (_pitch >= 90.0f)
-    _pitch = 89.0f;
-  if (_pitch <= -90.0f)
-    _pitch = -89.0f;
-  
+  _pitch += y_offset;
+    
   _look_at.y = sin(_pitch);
   _look_at.z = sin(_yaw) * cos(_pitch);
   _look_at.x = cos(_yaw) * cos(_pitch);

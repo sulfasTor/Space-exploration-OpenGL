@@ -8,6 +8,8 @@ GLuint _space_tex_id = 0;
 const int _stars_number = 1000;
 const int _ovnis_number = 500;
 
+static GLfloat angle = 0.0;
+
 double uniform0to1Random() {
   double r = random();
   return r / ((double)RAND_MAX + 1);
@@ -118,19 +120,10 @@ void draw_space ()
 {
   int i;
 
-  gl4duBindMatrix("modelMatrix");
-  gl4duPushMatrix(); {
-    gl4duTranslatef(0, 0, 0);
-    gl4duScalef(100, 10, 10);
-    gl4duSendMatrices();
-  } gl4duPopMatrix();
-  glDisable(GL_CULL_FACE);
-  glActiveTexture(GL_TEXTURE0);
-  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glBindTexture(GL_TEXTURE_2D, _star_tex_id);
-  gl4dgDraw(_torus);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  gl4duBindMatrix("modelMatrix"); /* Do not remove */
 
+  /* Main planet */
+  
   gl4duPushMatrix(); {
     gl4duTranslatef(0, 0, 0);
     gl4duScalef(_space_radius * 2.0, _space_radius * 2.0, _space_radius * 2.0);
@@ -142,6 +135,38 @@ void draw_space ()
   glBindTexture(GL_TEXTURE_2D, _space_tex_id);
   gl4dgDraw(_sphere);
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  /* Second planet */
+  
+  gl4duPushMatrix(); {
+    gl4duRotatef(-45, 1, 0, 0);
+    gl4duTranslatef(-_space_radius, 20 * _space_radius, _space_radius);
+    gl4duScalef(_space_radius * 2.0, _space_radius * 2.0, _space_radius * 2.0);
+    gl4duSendMatrices();
+  } gl4duPopMatrix();
+  glDisable(GL_CULL_FACE);
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  glBindTexture(GL_TEXTURE_2D, _space_tex_id);
+  gl4dgDraw(_sphere);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+
+  /* Moon */
+  angle += 1.0;
+  gl4duPushMatrix(); {
+    gl4duRotatef(angle, 1, 0, 0);
+    gl4duTranslatef(2.0*_space_radius+1000.0, 2.0*_space_radius+1000.0, 2.0*_space_radius+1000.0);
+    gl4duScalef(_space_radius * 0.5, _space_radius * 0.5, _space_radius * 0.5);
+    gl4duSendMatrices();
+  } gl4duPopMatrix();
+  glEnable(GL_CULL_FACE);
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  glBindTexture(GL_TEXTURE_2D, _star_tex_id);
+  gl4dgDraw(_sphere);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
 
   for (i = 0; i < _stars_number; ++i)
     {
