@@ -4,6 +4,7 @@
 #include <GL4D/gl4dg.h>
 #include <GL4D/gl4dp.h>
 #include <GL4D/gl4duw_SDL2.h>
+#include <float.h>
 
 /* Global variables */
 

@@ -1,14 +1,18 @@
 #include "space.h"
 #define NSUM 25
 
-const GLint _space_radius = 3000;
+const GLint _space_radius = 70000;
+const GLint _planet_radius = 3000;
+const int _stars_number = 1000;
+const int _ovnis_number = 500;
+const vector_t _stars_position[2] = {{0, 0, 0}, {_planet_radius, -20.0 * _planet_radius, 0}};
 GLuint _star_tex_id = 0;
 GLuint _ovni_tex_id = 0;
 GLuint _space_tex_id = 0;
-const int _stars_number = 1000;
-const int _ovnis_number = 500;
 
 static GLfloat angle = 0.0;
+/* static Gluint _star_vao_id = 0.0; */
+/* static Gluint *_star_vbo_id = 0.0; */
 
 double uniform0to1Random() {
   double r = random();
@@ -49,15 +53,14 @@ vector_t random_vector(GLfloat r)
 
 t_star generate_star ()
 {
-  vector_t v = random_vector (2.0 * _space_radius - 30.0);
+  vector_t v = random_vector (2.0 * _planet_radius - 30.0);
   return (t_star) { uniform0to1Random() * 30.0, v.x, v.y, v.z };
 }
 
 t_ovni generate_ovni ()
 {
-  vector_t v = random_vector ( _space_radius/2.0);
-  printf ("vec: %f, %f, %f\n", v.x, v.y, v.z);
-  return (t_ovni) { uniform0to1Random() * 50.0, v.x, 2.0 * _space_radius, v.z, uniform0to1Random() * 50.0 + 1.0, 100.0 };
+  vector_t v = random_vector ( _planet_radius/2.0);
+  return (t_ovni) { uniform0to1Random() * 50.0, v.x, 2.0 * _planet_radius, v.z, uniform0to1Random() * 50.0 + 1.0, 100.0 };
 }
 
 void generate_space ()
@@ -66,7 +69,6 @@ void generate_space ()
   GLuint star_tex[] = {RGB (255, 255, 255)};
   GLuint ovni_tex[] = {RGB (255, 255, 0)};
   GLuint space_tex[] = {100000, RGB (11, 11, 11), RGB (11, 11, 11), RGB (11, 11, 11), 0, 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, 0, 0, RGB (255, 255, 255)};
-  //SDL_Surface * s;
   
   _stars = (t_star*) malloc (_stars_number * sizeof (t_star));
   _ovnis = (t_ovni*) malloc (_ovnis_number * sizeof (t_ovni));
@@ -98,13 +100,6 @@ void generate_space ()
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  /* if ((s = SDL_LoadBMP("images/universe-2.bmp"))) */
-  /*   { */
-  /*     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, */
-  /* 		   s->format->BytesPerPixel == 3 ? GL_BGR : GL_BGRA, GL_UNSIGNED_BYTE, s->pixels); */
-  /*     SDL_FreeSurface(s); */
-  /*   } */
-  /* else */
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 15, 0, GL_RGBA, GL_UNSIGNED_BYTE, space_tex);
   glBindTexture (GL_TEXTURE_2D, 0);
   
@@ -121,12 +116,12 @@ void draw_space ()
   int i;
 
   gl4duBindMatrix("modelMatrix"); /* Do not remove */
-
+  
   /* Main planet */
   
   gl4duPushMatrix(); {
     gl4duTranslatef(0, 0, 0);
-    gl4duScalef(_space_radius * 2.0, _space_radius * 2.0, _space_radius * 2.0);
+    gl4duScalef(_planet_radius * 2.0, _planet_radius * 2.0, _planet_radius * 2.0);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glDisable(GL_CULL_FACE);
@@ -139,9 +134,9 @@ void draw_space ()
   /* Second planet */
   
   gl4duPushMatrix(); {
-    gl4duRotatef(-45, 1, 0, 0);
-    gl4duTranslatef(-_space_radius, 20 * _space_radius, _space_radius);
-    gl4duScalef(_space_radius * 2.0, _space_radius * 2.0, _space_radius * 2.0);
+    //gl4duRotatef(-45, 1, 0, 0);
+    gl4duTranslatef(-_stars_position[1].x, -_stars_position[1].y, -_stars_position[1].z);
+    gl4duScalef(_planet_radius * 2.0, _planet_radius * 2.0, _planet_radius * 2.0);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glDisable(GL_CULL_FACE);
@@ -156,11 +151,12 @@ void draw_space ()
   angle += 1.0;
   gl4duPushMatrix(); {
     gl4duRotatef(angle, 1, 0, 0);
-    gl4duTranslatef(2.0*_space_radius+1000.0, 2.0*_space_radius+1000.0, 2.0*_space_radius+1000.0);
-    gl4duScalef(_space_radius * 0.5, _space_radius * 0.5, _space_radius * 0.5);
+    gl4duTranslatef(0.0, 0.0, 3.0*_planet_radius);
+    gl4duScalef(_planet_radius * 0.5, _planet_radius * 0.5, _planet_radius * 0.5);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glEnable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
   glBindTexture(GL_TEXTURE_2D, _star_tex_id);
@@ -171,9 +167,9 @@ void draw_space ()
   for (i = 0; i < _stars_number; ++i)
     {
       gl4duPushMatrix(); {
-	gl4duTranslatef(_stars[i].x, _stars[i].y, _stars[i].z);
-	gl4duScalef(_stars[i].radius, _stars[i].radius, _stars[i].radius);
-	gl4duSendMatrices();
+  	gl4duTranslatef(_stars[i].x, _stars[i].y, _stars[i].z);
+  	gl4duScalef(_stars[i].radius, _stars[i].radius, _stars[i].radius);
+  	gl4duSendMatrices();
       } gl4duPopMatrix();
       glEnable(GL_CULL_FACE);
       glDisable(GL_DEPTH_TEST);
@@ -187,8 +183,8 @@ void draw_space ()
     for (i = 0; i < _ovnis_number; ++i)
     {
       _ovnis[i].y -= _ovnis[i].speed;
-      if (_ovnis[i].y <= -2.0 * _space_radius)
-	_ovnis[i].y = 2.0 * _space_radius;
+      if (_ovnis[i].y <= -2.0 * _planet_radius)
+	_ovnis[i].y = 2.0 * _planet_radius;
       gl4duPushMatrix(); {
     	gl4duTranslatef(_ovnis[i].x, _ovnis[i].y, _ovnis[i].z);
     	gl4duScalef(_ovnis[i].radius, _ovnis[i].radius, _ovnis[i].radius);

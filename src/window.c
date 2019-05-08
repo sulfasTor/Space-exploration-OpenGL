@@ -20,21 +20,22 @@ enum e_keys {
 
 static GLuint _keys[] = {0, 0, 0, 0, 0};
 int _wW = 1000, _wH = 800;
-int _xm = 500, _ym = 500;
-static int _xm_last = 500, _ym_last = 500;
+int _xm = 0, _ym = 0;
+static int _xm_last = 500, _ym_last = 400;
+static GLfloat x_offset, y_offset;
 
 GLuint _pId = 0;
 GLuint _sphere = 0;
 GLuint _plane = 0;
 GLuint _torus = 0;
 GLuint _cube = 0;
-vector_t _cam = {0, 0, -4000};
+vector_t _cam = {-1000, 1000, 0};
 
 GLfloat _pitch = 0.0;
-GLfloat _yaw = 0.0;
+GLfloat _yaw = -90.0;
 GLfloat _roll = 0.0;
 static GLfloat _msensitivity = 0.00005;
-static GLfloat _bound = 70000;
+static GLfloat _ambient_strength = 1.0;
 
 vector_t _look_at = {0, 0, 1};
 vector_t _up = {0, 1, 0};
@@ -52,9 +53,10 @@ void keydown(int);
 void pmotion(int, int);
 void idle(void);
 void normalize (vector_t *);
-void pitch_and_yaw();
+void pitch_and_yaw ();
 void roll (GLfloat);
-vector_t cross_product(vector_t, vector_t);
+vector_t cross_product (vector_t, vector_t);
+void update_ambient_strength ();
 
 /*!\brief créé la fenêtre, un screen 2D effacé en noir et lance une
  *  boucle infinie.*/
@@ -126,7 +128,7 @@ void draw (void)
 {
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
-  printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
+  //printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
   /* printf ("R %f %f %f\n", _right.x, _right.y, _right.z); */
   /* printf ("##############################################\n"); */
   
@@ -139,6 +141,8 @@ void draw (void)
   gl4duBindMatrix("modelMatrix");
   gl4duLoadIdentityf();
   gl4duBindMatrix(0);
+  update_ambient_strength ();
+  glUniform1f(glGetUniformLocation(_pId, "ambientStrength"), _ambient_strength);
   draw_space ();
   draw_vessel ();
 }
@@ -220,6 +224,23 @@ void keyup(int keycode) {
   }
 }
 
+void update_ambient_strength ()
+{
+  GLfloat dist, closest = FLT_MAX;
+  int i;
+
+  for (i = 0; i < 2; ++i)
+    {
+      dist = ((fabs(_stars_position[i].x) - fabs(_cam.x)) * (fabs(_stars_position[i].x) - fabs(_cam.x)) +
+	      (fabs(_stars_position[i].y) - fabs(_cam.y)) * (fabs(_stars_position[i].y) - fabs(_cam.y)) +
+	      (fabs(_stars_position[i].z) - fabs(_cam.z)) * (fabs(_stars_position[i].z) - fabs(_cam.z)));
+      dist = sqrt (dist);
+      if (dist < closest)
+	  closest = dist;
+    }
+  _ambient_strength = _space_radius / closest / 3.0;
+}
+
 void idle(void) {
   GLboolean modified = 0;
   static GLfloat speed = 1.0;
@@ -228,10 +249,9 @@ void idle(void) {
   dt = ((t = gl4dGetElapsedTime()) - t0) / 1000.0;
   t0 = t;
 
-  printf ("#########idle\n");
   if(_keys[KWARP])
     {
-      speed = 1000.0;
+      speed = 2000.0;
       gl4duBindMatrix ("projectionMatrix");
       gl4duLoadIdentityf ();
       gl4duFrustumf(-5.5, 5.0, -5.0 * _wH / (float) _wW, 5.0 * _wH / (float)_wW, 1.0, 2.0f * _space_radius * _space_radius + 1);
@@ -247,8 +267,8 @@ void idle(void) {
       roll (-dt * dtheta);
   if(_keys[KUP])
     {
-      //if (speed < 50.0)
-      speed += 10.0;
+      if (speed <= 70.0)
+	speed += 10.0;
       modified = 1;
     }  
   if(_keys[KDOWN])
@@ -257,13 +277,14 @@ void idle(void) {
       modified = 1;
     }
   if (!modified)
-    speed = 10.0;
+    speed = 0.0;
+
   pitch_and_yaw ();
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
   _cam.z += _look_at.z * speed;
   
-  if (fabs(_cam.x) >= _bound || fabs(_cam.x) >= _bound || fabs(_cam.x) >= _bound)
+  if (fabs(_cam.x) >= _space_radius || fabs(_cam.x) >= _space_radius || fabs(_cam.x) >= _space_radius)
     {
       _cam.x = 0.0;
       _cam.y = 0.0;
@@ -284,16 +305,16 @@ vector_t cross_product(vector_t a, vector_t b)
 
 void pitch_and_yaw ()
 {
-  GLfloat x_offset, y_offset;
-
-  x_offset = _xm - _xm_last;
-  y_offset = _ym_last - _ym;
-  _xm = _xm_last;
-  _ym = _ym_last;
-    
-  x_offset *= _msensitivity;
-  y_offset *= _msensitivity;
-
+  if (_xm != _xm_last || _ym != _ym_last)
+    {
+      x_offset = _xm - _xm_last;
+      y_offset = _ym_last - _ym;
+      _xm = _xm_last;
+      _ym = _ym_last;
+      x_offset *= _msensitivity;
+      y_offset *= _msensitivity;
+    }
+  
   _yaw += x_offset;
   _pitch += y_offset;
     
