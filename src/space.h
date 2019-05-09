@@ -21,7 +21,8 @@ typedef struct {
 extern const GLint _space_radius;
 extern GLuint _star_tex_id;
 extern GLuint _ovni_tex_id;
-extern GLuint _space_tex_id;
+extern GLuint _planet_tex_id;
+extern GLuint _sun_tex_id;
 extern const int _stars_number;
 extern const int _ovnis_number;
 extern const vector_t _stars_position;

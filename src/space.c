@@ -9,7 +9,8 @@ const vector_t _planets_position[2] = {{0, 0, 0}, {_planet_radius, -20.0 * _plan
 const vector_t _stars_position = {0,_space_radius, _space_radius};
 GLuint _star_tex_id = 0;
 GLuint _ovni_tex_id = 0;
-GLuint _space_tex_id = 0;
+GLuint _planet_tex_id = 0;
+GLuint _sun_tex_id = 0;
 
 static GLfloat angle = 0.0;
 /* static Gluint _star_vao_id = 0.0; */
@@ -69,7 +70,11 @@ void generate_space ()
   int i;
   GLuint star_tex[] = {RGB (255, 255, 255)};
   GLuint ovni_tex[] = {RGB (255, 255, 0)};
-  GLuint space_tex[] = {100000, RGB (11, 11, 11), RGB (11, 11, 11), RGB (11, 11, 11), 0, 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, 0, 0, RGB (255, 255, 255)};
+  GLuint planet_tex[] = {100000, RGB (11, 11, 11), RGB (11, 11, 11), RGB (11, 11, 11), 0, 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, RGB (11, 11, 11), 0, 0, 0, RGB (255, 255, 255)};
+  GLuint sun_tex[15];
+
+  for (i = 0; i < 15; ++i)
+    sun_tex[i] = RGB (255, rand()%255, 0);
   
   _stars = (t_star*) malloc (_stars_number * sizeof (t_star));
   _ovnis = (t_ovni*) malloc (_ovnis_number * sizeof (t_ovni));
@@ -94,15 +99,26 @@ void generate_space ()
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, ovni_tex);
   glBindTexture (GL_TEXTURE_2D, 0);
   
-  glGenTextures (1, &_space_tex_id);
-  glBindTexture (GL_TEXTURE_2D, _space_tex_id);
+  glGenTextures (1, &_planet_tex_id);
+  glBindTexture (GL_TEXTURE_2D, _planet_tex_id);
   glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 15, 0, GL_RGBA, GL_UNSIGNED_BYTE, space_tex);
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 15, 0, GL_RGBA, GL_UNSIGNED_BYTE, planet_tex);
   glBindTexture (GL_TEXTURE_2D, 0);
+
+  glGenTextures (1, &_sun_tex_id);
+  glBindTexture (GL_TEXTURE_2D, _sun_tex_id);
+  glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 15, 0, GL_RGBA, GL_UNSIGNED_BYTE, sun_tex);
+  glBindTexture (GL_TEXTURE_2D, 0);
+
   
   for (i = 0; i < _stars_number; ++i)
       _stars[i] = generate_star ();
@@ -121,15 +137,15 @@ void draw_space ()
   /* SUN */
   
   gl4duPushMatrix(); {
-    gl4duTranslatef(_stars_position.x, _stars_position.y, _stars_position.z);
-    gl4duScalef(2.0*_planet_radius, 2.0*_planet_radius, 2.0*_planet_radius);
+    gl4duTranslatef(_stars_position.x, _stars_position.y, _stars_position.z+_space_radius);
+    gl4duScalef(_space_radius, _space_radius, _space_radius);
     gl4duSendMatrices();
   } gl4duPopMatrix();
   glEnable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glBindTexture(GL_TEXTURE_2D, _ovni_tex_id);
+  glBindTexture(GL_TEXTURE_2D, _sun_tex_id);
   gl4dgDraw(_sphere);
   glBindTexture(GL_TEXTURE_2D, 0);
   
@@ -143,7 +159,7 @@ void draw_space ()
   glDisable(GL_CULL_FACE);
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glBindTexture(GL_TEXTURE_2D, _space_tex_id);
+  glBindTexture(GL_TEXTURE_2D, _planet_tex_id);
   gl4dgDraw(_sphere);
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -157,7 +173,7 @@ void draw_space ()
   glDisable(GL_CULL_FACE);
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-  glBindTexture(GL_TEXTURE_2D, _space_tex_id);
+  glBindTexture(GL_TEXTURE_2D, _planet_tex_id);
   gl4dgDraw(_sphere);
   glBindTexture(GL_TEXTURE_2D, 0);
 

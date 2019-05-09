@@ -134,6 +134,12 @@ void draw (void)
   lumPos[1] = _stars_position.y;
   lumPos[2] = _stars_position.z;
 
+  GLfloat viewPos[3];
+  viewPos[0] = _cam.x;
+  viewPos[1] = _cam.y;
+  viewPos[2] = _cam.z;
+
+
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
   //printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
@@ -153,6 +159,7 @@ void draw (void)
   update_ambient_strength ();
   glUniform1f(glGetUniformLocation(_pId, "ambientStrength"), _ambient_strength);
   glUniform3fv(glGetUniformLocation(_pId, "lightPos"), 1, lumPos);
+  glUniform3fv(glGetUniformLocation(_pId, "viewPos"), 1, viewPos);
   draw_space ();
   draw_vessel ();
   draw_enemy_vessel();
