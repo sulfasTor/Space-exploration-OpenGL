@@ -35,7 +35,7 @@ vector_t _cam = {-1000, 1000, 0};
 GLfloat _pitch = 0.0;
 GLfloat _yaw = 0.0;
 GLfloat _roll = 0.0;
-static GLfloat _msensitivity = 0.00005;
+static GLfloat _msensitivity = 0.00008;
 static GLfloat _ambient_strength = 1.0;
 
 vector_t _look_at = {0, 0, 1};
@@ -60,6 +60,7 @@ void roll (GLfloat);
 vector_t cross_product (vector_t, vector_t);
 void update_ambient_strength ();
 GLfloat calculate_distance ();
+void rotate ();
 
 /*!\brief créé la fenêtre, un screen 2D effacé en noir et lance une
  *  boucle infinie.*/
@@ -140,6 +141,7 @@ void draw (void)
   viewPos[2] = _cam.z;
 
 
+  printf ("%f %f %f\n", _pitch * 180/M_PI, _yaw* 180/M_PI, _roll);
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
   //printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
@@ -284,9 +286,9 @@ void idle(void) {
     resize(_wW, _wH);
 
   if(_keys[KLEFT])
-      roll (dt * dtheta);
+    roll (dt * dtheta);
   if(_keys[KRIGHT])
-      roll (-dt * dtheta);
+    roll (-dt * dtheta);
   if(_keys[KUP])
     {
       //if (speed <= 100.0)
@@ -302,6 +304,7 @@ void idle(void) {
     speed = 5.0;
 
   pitch_and_yaw ();
+  //rotate ();
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
   _cam.z += _look_at.z * speed;
@@ -320,6 +323,42 @@ vector_t cross_product(vector_t a, vector_t b)
     }; 
   return c;
 }
+
+/* static quaternion_t _rot = {-90, 0, 0, 0}; */
+/* void rotate () */
+/* { */
+/*   if (_xm != _xm_last || _ym != _ym_last) */
+/*     { */
+/*       _yaw = _xm - _xm_last; */
+/*       _pitch = _ym_last - _ym; */
+/*       _xm = _xm_last; */
+/*       _ym = _ym_last; */
+/*       _yaw *= _msensitivity; */
+/*       _pitch *= _msensitivity; */
+/*     } */
+/*   else */
+/*     { */
+      
+/*     } */
+
+/*   quaternion_t qyaw = get_quaternion_from_axis ((vector_t){0,1,0}, _yaw); */
+/*   quaternion_t qpitch = get_quaternion_from_axis ((vector_t){1,0,0}, _pitch); */
+/*   //quaternion_t qroll = get_quaternion_from_axis (_look_at, _roll); */
+/*   //normalize_quaternion(&qroll); */
+/*   quaternion_t result = mult (mult (qpitch, _rot),  qyaw); */
+
+/*   _look_at.x = result.x; */
+/*   _look_at.y = result.y; */
+/*   _look_at.z = result.z; */
+/*   normalize (&_look_at); */
+
+/*   _right = cross_product (_look_at, _up); */
+/*   normalize (&_right); */
+
+/*   _up = cross_product (_right, _look_at); */
+/*   normalize (&_up); */
+
+/* } */
 
 void pitch_and_yaw ()
 {
@@ -358,4 +397,5 @@ void roll (GLfloat angle)
   
   _right = cross_product (_look_at, _up);
   normalize (&_right);
+    
 }

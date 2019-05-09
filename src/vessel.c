@@ -50,28 +50,24 @@ void generate_vessel ()
 void draw_vessel ()
 {
   GLfloat vpitch, vyaw;
-
-  gl4duBindMatrix("modelMatrix");
-
-  /* Vessel */
-
+  
   vpitch = _pitch * 180/M_PI;
-  vpitch = fabs(vpitch) >= 90.0 ? (signbit(vpitch) == 0 ? -1 : 1) * 90.0: vpitch;
-  
+  vpitch = fabs(vpitch) >= 90.0 ? (signbit(vpitch) == 0 ? 1 : -1) * 89.0: vpitch;
   vyaw = _yaw * 180/M_PI;
-  vyaw = fabs(vyaw) >= 90.0 ? (signbit(vyaw) == 0 ? -1 : 1) * 90.0: vyaw;
+  vyaw = fabs(vyaw) >= 90.0 ? (signbit(vyaw) == 0 ? 1 : -1) * 89.0: vyaw;
 
-  printf ("%f %f\n", vpitch, vyaw);
-  
+  //printf ("%f %f\n", vpitch, vyaw);
+  gl4duBindMatrix("modelMatrix");
+  /* Vessel */  
   gl4duBindMatrix("projectionMatrix");
   gl4duPushMatrix(); {
     gl4duLoadIdentityf();
     gl4duBindMatrix("modelMatrix");
     gl4duPushMatrix(); {
       gl4duLoadIdentityf();
-      gl4duRotatef(vyaw, 0, _look_at.y , 0);
+      gl4duRotatef(vyaw, 0, 1 , 0);
       gl4duRotatef(-vpitch, 1, 0, 0);
-      gl4duTranslatef(-1.0 + 2.0 * _xm/(float)_wW, 1.0 - 2.0 * _ym/(float)_wH, 0.0);
+      gl4duTranslatef(0.0, 0.0, 0.0);
       gl4duScalef(0.1, 0.1, 0.5);
       gl4duBindMatrix("viewMatrix");
       gl4duPushMatrix(); {
