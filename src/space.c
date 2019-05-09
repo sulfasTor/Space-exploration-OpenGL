@@ -5,7 +5,8 @@ const GLint _space_radius = 70000;
 const GLint _planet_radius = 3000;
 const int _stars_number = 1000;
 const int _ovnis_number = 500;
-const vector_t _stars_position[2] = {{0, 0, 0}, {_planet_radius, -20.0 * _planet_radius, 0}};
+const vector_t _planets_position[2] = {{0, 0, 0}, {_planet_radius, -20.0 * _planet_radius, 0}};
+const vector_t _stars_position = {0,_space_radius, _space_radius};
 GLuint _star_tex_id = 0;
 GLuint _ovni_tex_id = 0;
 GLuint _space_tex_id = 0;
@@ -116,6 +117,21 @@ void draw_space ()
   int i;
 
   gl4duBindMatrix("modelMatrix"); /* Do not remove */
+
+  /* SUN */
+  
+  gl4duPushMatrix(); {
+    gl4duTranslatef(_stars_position.x, _stars_position.y, _stars_position.z);
+    gl4duScalef(2.0*_planet_radius, 2.0*_planet_radius, 2.0*_planet_radius);
+    gl4duSendMatrices();
+  } gl4duPopMatrix();
+  glEnable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  glBindTexture(GL_TEXTURE_2D, _ovni_tex_id);
+  gl4dgDraw(_sphere);
+  glBindTexture(GL_TEXTURE_2D, 0);
   
   /* Main planet */
   
@@ -134,8 +150,7 @@ void draw_space ()
   /* Second planet */
   
   gl4duPushMatrix(); {
-    //gl4duRotatef(-45, 1, 0, 0);
-    gl4duTranslatef(-_stars_position[1].x, -_stars_position[1].y, -_stars_position[1].z);
+    gl4duTranslatef(-_planets_position[1].x, -_planets_position[1].y, -_planets_position[1].z);
     gl4duScalef(_planet_radius * 2.0, _planet_radius * 2.0, _planet_radius * 2.0);
     gl4duSendMatrices();
   } gl4duPopMatrix();

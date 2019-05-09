@@ -17,5 +17,6 @@ enum e_point_of_view
 void generate_vessel ();
 void draw_vessel ();
 void clean_vessel ();
+void draw_enemy_vessel ();
 
 #endif

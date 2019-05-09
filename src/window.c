@@ -9,6 +9,7 @@
 #include "common.h"
 #include "space.h"
 #include "vessel.h"
+#include "quaternion.h"
 
 enum e_keys {
 	     KLEFT = 0,
@@ -32,7 +33,7 @@ GLuint _cube = 0;
 vector_t _cam = {-1000, 1000, 0};
 
 GLfloat _pitch = 0.0;
-GLfloat _yaw = -90.0;
+GLfloat _yaw = 0.0;
 GLfloat _roll = 0.0;
 static GLfloat _msensitivity = 0.00005;
 static GLfloat _ambient_strength = 1.0;
@@ -40,6 +41,7 @@ static GLfloat _ambient_strength = 1.0;
 vector_t _look_at = {0, 0, 1};
 vector_t _up = {0, 1, 0};
 vector_t _right = {1, 0, 0};
+
 
 /* Forward declarations */
 
@@ -57,6 +59,7 @@ void pitch_and_yaw ();
 void roll (GLfloat);
 vector_t cross_product (vector_t, vector_t);
 void update_ambient_strength ();
+GLfloat calculate_distance ();
 
 /*!\brief créé la fenêtre, un screen 2D effacé en noir et lance une
  *  boucle infinie.*/
@@ -114,7 +117,7 @@ void resize (int w, int h)
   glViewport (0, 0, _wW, _wH);
   gl4duBindMatrix ("projectionMatrix");
   gl4duLoadIdentityf ();
-  gl4duFrustumf(-1.0, 1.0, -1.0 * _wH / (float) _wW, 1.0 * _wH / (float)_wW, 1.0, 2.0f * _space_radius * _space_radius + 1.0);
+  gl4duFrustumf(-1.0, 1.0, -1.0 * _wH / (float) _wW, 1.0 * _wH / (float)_wW, 1.0, 2.0 * _space_radius + 1.0);
 }
 
 void quit (void)
@@ -126,6 +129,11 @@ void quit (void)
 
 void draw (void)
 {
+  GLfloat lumPos[3];
+  lumPos[0] = _stars_position.x;
+  lumPos[1] = _stars_position.y;
+  lumPos[2] = _stars_position.z;
+
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
   //printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
@@ -136,6 +144,7 @@ void draw (void)
   glUseProgram(_pId);
   gl4duBindMatrix("viewMatrix");
   gl4duLoadIdentityf();
+  //gl4duLookAtf (_cam.x, _cam.y, _cam.z, _look_at.x, _look_at.y, _look_at.z, _up.x, _up.y, _up.z);
   gl4duLookAtf (_cam.x, _cam.y, _cam.z, _look_at.x + _cam.x, _look_at.y + _cam.y, _look_at.z + _cam.z, _up.x, _up.y, _up.z);
   
   gl4duBindMatrix("modelMatrix");
@@ -143,8 +152,10 @@ void draw (void)
   gl4duBindMatrix(0);
   update_ambient_strength ();
   glUniform1f(glGetUniformLocation(_pId, "ambientStrength"), _ambient_strength);
+  glUniform3fv(glGetUniformLocation(_pId, "lightPos"), 1, lumPos);
   draw_space ();
   draw_vessel ();
+  draw_enemy_vessel();
 }
 
 void normalize (vector_t *v)
@@ -224,21 +235,25 @@ void keyup(int keycode) {
   }
 }
 
+GLfloat calculate_distance ()
+{
+  GLfloat dist;
+
+  dist = (_cam.x * _cam.x + _cam.y * _cam.y + _cam.z * _cam.z);
+  dist = sqrt (dist);
+
+  return dist;
+}
+
 void update_ambient_strength ()
 {
-  GLfloat dist, closest = FLT_MAX;
-  int i;
+  GLfloat dist;
 
-  for (i = 0; i < 2; ++i)
-    {
-      dist = ((fabs(_stars_position[i].x) - fabs(_cam.x)) * (fabs(_stars_position[i].x) - fabs(_cam.x)) +
-	      (fabs(_stars_position[i].y) - fabs(_cam.y)) * (fabs(_stars_position[i].y) - fabs(_cam.y)) +
-	      (fabs(_stars_position[i].z) - fabs(_cam.z)) * (fabs(_stars_position[i].z) - fabs(_cam.z)));
-      dist = sqrt (dist);
-      if (dist < closest)
-	  closest = dist;
-    }
-  _ambient_strength = _space_radius / closest / 3.0;
+  dist = ((fabs(_stars_position.x) - fabs(_cam.x)) * (fabs(_stars_position.x) - fabs(_cam.x)) +
+	  (fabs(_stars_position.y) - fabs(_cam.y)) * (fabs(_stars_position.y) - fabs(_cam.y)) +
+	  (fabs(_stars_position.z) - fabs(_cam.z)) * (fabs(_stars_position.z) - fabs(_cam.z)));
+  dist = sqrt (dist);
+  _ambient_strength = 2.0 * _space_radius / dist ;
 }
 
 void idle(void) {
@@ -267,8 +282,8 @@ void idle(void) {
       roll (-dt * dtheta);
   if(_keys[KUP])
     {
-      if (speed <= 70.0)
-	speed += 10.0;
+      //if (speed <= 100.0)
+      speed += 10.0;
       modified = 1;
     }  
   if(_keys[KDOWN])
@@ -277,19 +292,15 @@ void idle(void) {
       modified = 1;
     }
   if (!modified)
-    speed = 0.0;
+    speed = 5.0;
 
   pitch_and_yaw ();
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
   _cam.z += _look_at.z * speed;
   
-  if (fabs(_cam.x) >= _space_radius || fabs(_cam.x) >= _space_radius || fabs(_cam.x) >= _space_radius)
-    {
-      _cam.x = 0.0;
-      _cam.y = 0.0;
-      _cam.z = 0.0;
-    }
+  if (calculate_distance () >= _space_radius)
+    _cam = (vector_t){0,0,0};
 }
 
 vector_t cross_product(vector_t a, vector_t b)
@@ -322,11 +333,10 @@ void pitch_and_yaw ()
   _look_at.z = sin(_yaw) * cos(_pitch);
   _look_at.x = cos(_yaw) * cos(_pitch);
   normalize (&_look_at);
-  
-  //vector_t up_y = (vector_t) {0.0f,1.0f,0.0f};
+
   _right = cross_product (_look_at, _up);
   normalize (&_right);
-  
+
   _up = cross_product (_right, _look_at);
   normalize (&_up);
 }

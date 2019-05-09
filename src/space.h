@@ -24,7 +24,8 @@ extern GLuint _ovni_tex_id;
 extern GLuint _space_tex_id;
 extern const int _stars_number;
 extern const int _ovnis_number;
-extern const vector_t _stars_position[2];
+extern const vector_t _stars_position;
+extern const vector_t _planets_position[2];
 
 t_star *_stars;
 t_ovni *_ovnis;

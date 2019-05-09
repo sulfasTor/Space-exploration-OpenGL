@@ -8,20 +8,19 @@ GLfloat _vessel_data[] =
    0.0, 0.0, 1.0,
    1.0, 1.0, 0.0,
    1.0, 0.0, 0.0,
-
    0.0, 0.0, 1.0,
    -1.0, 0.0, 0.0,
    -1.0, -1.0, 0.0,
    0.0, 0.0, 1.0,
    1.0, -1.0, 0.0,
    1.0, 0.0, 0.0,
-
   };
 
 GLuint _vessel_vao_id = 0;
 GLuint _vessel_vbo_id = 0;
 GLuint _vessel_tex_id = 0;
 GLuint _space_radius;
+GLfloat angle = 0.0;
 
 void generate_vessel ()
 {
@@ -56,16 +55,13 @@ void draw_vessel ()
 
   /* Vessel */
 
-  vpitch = _pitch * 180;
-  //vpitch = vpitch >= 90.0 ? (signbit(vpitch) == 0 ? -1 : 1) * 90.0: vpitch;
+  vpitch = _pitch * 180/M_PI;
+  vpitch = fabs(vpitch) >= 90.0 ? (signbit(vpitch) == 0 ? -1 : 1) * 90.0: vpitch;
+  
+  vyaw = _yaw * 180/M_PI;
+  vyaw = fabs(vyaw) >= 90.0 ? (signbit(vyaw) == 0 ? -1 : 1) * 90.0: vyaw;
 
-  vyaw = _yaw * 180;
-  //vyaw = fabs(vyaw) >= 90.0 ? (signbit(vyaw) == 0 ? -1 : 1) * 90.0: vyaw;
-
-  printf ("%f %f |||", vpitch, vyaw);
-  printf ("%f %f\n", 1.0 - 2.0 * (float)_xm / (float)_wW, 1.0 - 2.0 * (float)_ym / (float)_wH);
-
-
+  printf ("%f %f\n", vpitch, vyaw);
   
   gl4duBindMatrix("projectionMatrix");
   gl4duPushMatrix(); {
@@ -73,8 +69,8 @@ void draw_vessel ()
     gl4duBindMatrix("modelMatrix");
     gl4duPushMatrix(); {
       gl4duLoadIdentityf();
-      gl4duRotatef(vyaw, 0, 1 , 0);
-      gl4duRotatef(-vpitch, _look_at.x, 0, 0);
+      gl4duRotatef(vyaw, 0, _look_at.y , 0);
+      gl4duRotatef(-vpitch, 1, 0, 0);
       gl4duTranslatef(-1.0 + 2.0 * _xm/(float)_wW, 1.0 - 2.0 * _ym/(float)_wH, 0.0);
       gl4duScalef(0.1, 0.1, 0.5);
       gl4duBindMatrix("viewMatrix");
@@ -95,8 +91,29 @@ void draw_vessel ()
   glBindVertexArray(_vessel_vao_id);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
   glBindVertexArray(0);
-  //gl4dgDraw(_sphere);
   
+  gl4duBindMatrix(0);
+}
+
+void draw_enemy_vessel ()
+{
+  angle += 1.0;
+  
+  gl4duBindMatrix("modelMatrix");
+  gl4duPushMatrix(); {
+    gl4duRotatef(angle, 1.0, 0.0, 1.0);
+    gl4duTranslatef(0.0, 0.0, 3000.0);
+    gl4duScalef(10.0, 10.0, 50.0);
+    gl4duSendMatrices();
+  } gl4duPopMatrix();
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, _vessel_tex_id);
+  glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+  glBindVertexArray(_vessel_vao_id);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+  glBindVertexArray(0);
   gl4duBindMatrix(0);
 }
 

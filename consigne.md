@@ -27,8 +27,8 @@ inspirer des exemples suivants : Elite (Amiga) / Frontier : Elite 2.
 
 ## Fonctionnalités attendues
 
--   Piloter un vaisseau dans l’espace
--   Gérer l’éclairage en fonction des étoiles les plus proches ;
+-   Piloter un vaisseau dans l’espace [X/2]
+-   Gérer l’éclairage en fonction des étoiles les plus proches [X/2]
 -   Détecter les collisions avec d’autres vaisseaux et/ou astéroides ;
 -   Gérer différents points de vue ;
 -   Gérer des modes combats ;
