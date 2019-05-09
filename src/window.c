@@ -35,14 +35,15 @@ vector_t _cam = {-1000, 1000, 0};
 GLfloat _pitch = 0.0;
 GLfloat _yaw = 0.0;
 GLfloat _roll = 0.0;
-static GLfloat _msensitivity = 0.00008;
 static GLfloat _ambient_strength = 1.0;
 
 vector_t _look_at = {0, 0, 1};
 vector_t _up = {0, 1, 0};
 vector_t _right = {1, 0, 0};
 
+static quaternion_t _rot = {-90.0, 0, 0, 0};
 
+GLboolean _view_inside = 0;
 /* Forward declarations */
 
 void quit(void);
@@ -55,9 +56,9 @@ void keydown(int);
 void pmotion(int, int);
 void idle(void);
 void normalize (vector_t *);
-void pitch_and_yaw ();
+void inside_camera_rotate ();
 void roll (GLfloat);
-vector_t cross_product (vector_t, vector_t);
+vector_t cross_product (const vector_t, const vector_t);
 void update_ambient_strength ();
 GLfloat calculate_distance ();
 void rotate ();
@@ -102,11 +103,11 @@ void init_data ()
   _sphere = gl4dgGenSpheref (30, 30);
   _cube = gl4dgGenCubef();
   _plane = gl4dgGenQuadf ();
-  _torus = gl4dgGenTorusf(30, 30, 1);
+  _torus = gl4dgGenTorusf(30, 30, 200);
 
   srand (time (0)); 
   generate_space ();
-  generate_vessel ();
+  generate_vessels ();
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -140,8 +141,8 @@ void draw (void)
   viewPos[1] = _cam.y;
   viewPos[2] = _cam.z;
 
-
-  printf ("%f %f %f\n", _pitch * 180/M_PI, _yaw* 180/M_PI, _roll);
+  //printf ("%d\n", _view_inside);
+  //printf ("%f %f %f\n", _pitch * 180/M_PI, _yaw* 180/M_PI, _roll);
   //printf ("P: %f %f %f\n", _cam.x, _cam.y, _cam.z);
   /* printf ("F %f %f %f\n", _look_at.x, _look_at.y, _look_at.z); */
   //printf ("U %f %f %f\n", _up.x, _up.y, _up.z);
@@ -152,7 +153,6 @@ void draw (void)
   glUseProgram(_pId);
   gl4duBindMatrix("viewMatrix");
   gl4duLoadIdentityf();
-  //gl4duLookAtf (_cam.x, _cam.y, _cam.z, _look_at.x, _look_at.y, _look_at.z, _up.x, _up.y, _up.z);
   gl4duLookAtf (_cam.x, _cam.y, _cam.z, _look_at.x + _cam.x, _look_at.y + _cam.y, _look_at.z + _cam.z, _up.x, _up.y, _up.z);
   
   gl4duBindMatrix("modelMatrix");
@@ -163,8 +163,7 @@ void draw (void)
   glUniform3fv(glGetUniformLocation(_pId, "lightPos"), 1, lumPos);
   glUniform3fv(glGetUniformLocation(_pId, "viewPos"), 1, viewPos);
   draw_space ();
-  draw_vessel ();
-  draw_enemy_vessel();
+  draw_vessels ();
 }
 
 void normalize (vector_t *v)
@@ -239,6 +238,9 @@ void keyup(int keycode) {
   case 'h':
     _keys[KWARP] = 0;
     break;
+  case 'a':
+    _view_inside = !_view_inside;
+    break;
   default:
     break;
   }
@@ -272,7 +274,7 @@ void idle(void) {
   static double t0 = 0, t;
   dt = ((t = gl4dGetElapsedTime()) - t0) / 1000.0;
   t0 = t;
-
+  
   if(_keys[KWARP])
     {
       speed = 2000.0;
@@ -303,8 +305,10 @@ void idle(void) {
   if (!modified)
     speed = 5.0;
 
-  pitch_and_yaw ();
-  //rotate ();
+  if (_view_inside)
+    inside_camera_rotate ();
+  else
+    rotate ();
   _cam.x += _look_at.x * speed;
   _cam.y += _look_at.y * speed;
   _cam.z += _look_at.z * speed;
@@ -313,7 +317,7 @@ void idle(void) {
     _cam = (vector_t){0,0,0};
 }
 
-vector_t cross_product(vector_t a, vector_t b)
+vector_t cross_product(const vector_t a, const vector_t b)
 {
   vector_t c = (vector_t)
     {
@@ -324,52 +328,50 @@ vector_t cross_product(vector_t a, vector_t b)
   return c;
 }
 
-/* static quaternion_t _rot = {-90, 0, 0, 0}; */
-/* void rotate () */
-/* { */
-/*   if (_xm != _xm_last || _ym != _ym_last) */
-/*     { */
-/*       _yaw = _xm - _xm_last; */
-/*       _pitch = _ym_last - _ym; */
-/*       _xm = _xm_last; */
-/*       _ym = _ym_last; */
-/*       _yaw *= _msensitivity; */
-/*       _pitch *= _msensitivity; */
-/*     } */
-/*   else */
-/*     { */
-      
-/*     } */
-
-/*   quaternion_t qyaw = get_quaternion_from_axis ((vector_t){0,1,0}, _yaw); */
-/*   quaternion_t qpitch = get_quaternion_from_axis ((vector_t){1,0,0}, _pitch); */
-/*   //quaternion_t qroll = get_quaternion_from_axis (_look_at, _roll); */
-/*   //normalize_quaternion(&qroll); */
-/*   quaternion_t result = mult (mult (qpitch, _rot),  qyaw); */
-
-/*   _look_at.x = result.x; */
-/*   _look_at.y = result.y; */
-/*   _look_at.z = result.z; */
-/*   normalize (&_look_at); */
-
-/*   _right = cross_product (_look_at, _up); */
-/*   normalize (&_right); */
-
-/*   _up = cross_product (_right, _look_at); */
-/*   normalize (&_up); */
-
-/* } */
-
-void pitch_and_yaw ()
+void inside_camera_rotate ()
 {
+  GLfloat msensitivity = 0.005;
+  GLfloat yaw, pitch;
+  static GLfloat _last_x, _last_y;
+  
+  _rot = get_quaternion_from_euler_angles (_pitch, _yaw, _roll);
+  yaw = _xm - _last_x;
+  pitch = _last_y - _ym;
+  yaw *= msensitivity;
+  pitch *= msensitivity;
+  
+  quaternion_t qyaw = get_quaternion_from_axis ((vector_t) {0, 1, 0}, yaw);
+  quaternion_t qpitch = get_quaternion_from_axis ((vector_t) {1, 0, 0}, pitch);
+  //quaternion_t qroll = get_quaternion_from_axis (_look_at, _roll);
+  //normalize_quaternion(&qroll);
+  quaternion_t result = mult (mult (qpitch, _rot),  qyaw);
+  
+  
+  _look_at.x = result.x;
+  _look_at.y = result.y;
+  _look_at.z = result.z;
+  normalize (&_look_at);
+
+  _right = cross_product (_look_at, _up);
+  normalize (&_right);
+
+  _up = cross_product (_right, _look_at);
+  normalize (&_up);
+
+}
+
+void rotate ()
+{
+  GLfloat msensitivity = 0.00008;
+  
   if (_xm != _xm_last || _ym != _ym_last)
     {
       x_offset = _xm - _xm_last;
       y_offset = _ym_last - _ym;
       _xm = _xm_last;
       _ym = _ym_last;
-      x_offset *= _msensitivity;
-      y_offset *= _msensitivity;
+      x_offset *= msensitivity;
+      y_offset *= msensitivity;
     }
   
   _yaw += x_offset;

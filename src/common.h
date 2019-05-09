@@ -5,7 +5,6 @@
 #include <GL4D/gl4dp.h>
 #include <GL4D/gl4df.h>
 #include <GL4D/gl4duw_SDL2.h>
-#include <float.h>
 
 /* Global variables */
 
@@ -28,5 +27,6 @@ extern vector_t _right;
 extern GLfloat _pitch;
 extern GLfloat _yaw;
 extern GLfloat _roll;
+extern GLboolean _view_inside;
 
 #endif /* __COMMON_H__ */

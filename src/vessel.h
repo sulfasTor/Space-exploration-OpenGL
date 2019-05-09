@@ -2,21 +2,22 @@
 #define __VESSEL_H__
 
 #include "common.h"
+#include "utils.h"
 
 extern GLuint _vessel_vao_id;
 extern GLuint _vessel_vbo_id;
 extern GLuint _vessel_tex_id;
 
-enum e_point_of_view
-  {
-   INSIDE = 0,
-   EXTERIOR,
-   COCKPIT
-  };
+typedef struct {
+  vector_t rot_axis;
+  vector_t pos;
+  vector_t origin;
+  GLfloat speed;
+  GLfloat health;
+} enemy_t;
 
-void generate_vessel ();
-void draw_vessel ();
+void generate_vessels ();
+void draw_vessels ();
 void clean_vessel ();
-void draw_enemy_vessel ();
 
 #endif

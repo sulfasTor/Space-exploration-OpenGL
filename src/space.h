@@ -2,7 +2,7 @@
 #define __SPACE_H__
 
 #include "common.h"
-#include <time.h>
+#include "utils.h"
 
 typedef struct {
   GLuint radius;
