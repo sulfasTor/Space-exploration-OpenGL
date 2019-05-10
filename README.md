@@ -1,20 +1,20 @@
 
 # Table of Contents
 
-1.  [Descriptif général et consigne](#orgbdae62a)
-2.  [Fonctionnalités attendues](#org00330f6)
-3.  [Description du code source](#orga84bd07)
-4.  [Le jeu](#orge1d7f94)
-5.  [Le milieu](#org2a78524)
-6.  [La caméra](#orga4a647a)
-7.  [Gameplay](#org798d151)
-8.  [Compilation](#orgf0c1362)
-9.  [Captures d'écran](#orgc7ea6dd)
-10. [Conclusion](#orgf3e0e8d)
+1.  [Descriptif général et consigne](#org720cd80)
+2.  [Fonctionnalités attendues](#org2cab047)
+3.  [Description du code source](#orge8321f9)
+4.  [Le jeu](#orgf35894f)
+5.  [Le milieu](#orgcad75bd)
+6.  [La caméra](#orgfde637f)
+7.  [Gameplay](#orgdd98119)
+8.  [Compilation](#org5bc69ba)
+9.  [Captures d'écran](#org229b9bd)
+10. [Conclusion](#org46c7f98)
 
 
 
-<a id="orgbdae62a"></a>
+<a id="org720cd80"></a>
 
 # Descriptif général et consigne
 
@@ -26,7 +26,7 @@ rencontrés mais le navire peut aussi bien être amené à combattre d’autres
 inspirer des exemples suivants : Elite (Amiga) / Frontier : Elite 2.
 
 
-<a id="org00330f6"></a>
+<a id="org2cab047"></a>
 
 # Fonctionnalités attendues
 
@@ -52,9 +52,14 @@ inspirer des exemples suivants : Elite (Amiga) / Frontier : Elite 2.
 ## TODO Jouer en réseau
 
 
-<a id="orga84bd07"></a>
+<a id="orge8321f9"></a>
 
 # Description du code source
+
+
+## Repo git
+
+<https://gitlab.com/sulfasTor/lucky_starr>
 
     .
     |___ shaders
@@ -137,7 +142,7 @@ Fichier d'en tête de `vessel.c`.
 Gère l'animation et le jeu.
 
 
-<a id="orge1d7f94"></a>
+<a id="orgf35894f"></a>
 
 # Le jeu
 
@@ -157,7 +162,7 @@ Dans le programme aucune texture a été charge d'une image ni d'objet
 `.obj`. Tout est crée dans le programme.
 
 
-<a id="org2a78524"></a>
+<a id="orgcad75bd"></a>
 
 # Le milieu
 
@@ -180,7 +185,7 @@ Dans la planètes ayant une lune des vaisseau ennemis se promènent dans
 des orbites de surveillance.
 
 
-<a id="orga4a647a"></a>
+<a id="orgfde637f"></a>
 
 # La caméra
 
@@ -235,7 +240,7 @@ utile pour la transition entre la caméra classique et la caméra
 quaternion.
 
 
-<a id="org798d151"></a>
+<a id="orgdd98119"></a>
 
 # Gameplay
 
@@ -266,7 +271,7 @@ rotation.
 La caméra constitué l'un des plus grand défaut du jeux.
 
 
-## Fonctionnalités non implémentés
+## Fonctionnalités non implémentées
 
 Ce projet a constitué pour moi un défi. Pour manque de temps je me
 suis arrêté à l'implémentation des tirs lasers qui n'a pas été finit
@@ -284,7 +289,7 @@ et donc non inclut dans le jeu.
     A : Change le point de vue.
 
 
-<a id="orgf0c1362"></a>
+<a id="org5bc69ba"></a>
 
 # Compilation
 
@@ -300,7 +305,7 @@ Pour executer le jeu il faut taper:
     ./game
 
 
-<a id="orgc7ea6dd"></a>
+<a id="org229b9bd"></a>
 
 # Captures d'écran
 
@@ -309,11 +314,11 @@ Pour executer le jeu il faut taper:
 ![img](game-3.png)
 
 
-<a id="orgf3e0e8d"></a>
+<a id="org46c7f98"></a>
 
 # Conclusion
 
 Ce jeu n'a pas atteint son objectif décrit dans les fontionnalités
-attendues. Cependant il essaie de présenter une jolie scène en
-n'utilisant que les moyens du code (sans .OBJ ni images).
+attendues. Cependant il essaie de présenter à l'utilisater une jolie
+scène en n'utilisant que les moyens du code (sans .OBJ ni images).
 
