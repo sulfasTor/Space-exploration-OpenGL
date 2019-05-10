@@ -30,6 +30,7 @@ GLuint _sphere = 0;
 GLuint _plane = 0;
 GLuint _torus = 0;
 GLuint _cube = 0;
+GLuint _cylinder = 0;
 vector_t _cam = {-1000, 1000, 0};
 
 GLfloat _pitch = 0.0;
@@ -54,6 +55,7 @@ void draw(void);
 void keyup(int);
 void keydown(int);
 void pmotion(int, int);
+void click ();
 void idle(void);
 void normalize (vector_t *);
 void inside_camera_rotate ();
@@ -78,6 +80,7 @@ int main (int argc, char ** argv)
   gl4duwKeyUpFunc(keyup);
   gl4duwKeyDownFunc (keydown);
   gl4duwPassiveMotionFunc (pmotion);
+  //gl4duwMouseFunc(click);
   gl4duwDisplayFunc (draw);
   gl4duwIdleFunc (idle);
   gl4duwMainLoop ();
@@ -87,7 +90,7 @@ int main (int argc, char ** argv)
 /*!\brief initialise les paramètres OpenGL et les données */
 void init (void)
 {
-  glClearColor(0, 0, 0.0, 0);
+  glClearColor(0, 0, 0, 0);
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_TEXTURE_2D);
@@ -104,6 +107,7 @@ void init_data ()
   _cube = gl4dgGenCubef();
   _plane = gl4dgGenQuadf ();
   _torus = gl4dgGenTorusf(30, 30, 200);
+  _cylinder = gl4dgGenCylinderf (10, 10);
 
   srand (time (0)); 
   generate_space ();
@@ -111,8 +115,6 @@ void init_data ()
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-/*!\brief Cette fonction paramétre la vue (viewport) OpenGL en
- * fonction des dimensions de la fenêtre.*/
 void resize (int w, int h)
 {
   _wW  = w; _wH = h;
@@ -183,6 +185,13 @@ void pmotion(int x, int y)
   _xm = x;
   _ym = y;
 }
+
+/* void click (int button , int state, int x __attribute__((unused)) , int y __attribute__((unused))) */
+/* { */
+/*   if (button == GL4D_BUTTON_LEFT) */
+/*     if (state) */
+/*       shoot (); */
+/* } */
 
 void keydown(int keycode) {
   GLint v[2];
@@ -303,7 +312,7 @@ void idle(void) {
       modified = 1;
     }
   if (!modified)
-    speed = 5.0;
+    speed = 10.0;
 
   if (_view_inside)
     inside_camera_rotate ();
@@ -345,7 +354,6 @@ void inside_camera_rotate ()
   //quaternion_t qroll = get_quaternion_from_axis (_look_at, _roll);
   //normalize_quaternion(&qroll);
   quaternion_t result = mult (mult (qpitch, _rot),  qyaw);
-  
   
   _look_at.x = result.x;
   _look_at.y = result.y;

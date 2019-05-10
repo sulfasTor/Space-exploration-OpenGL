@@ -3,7 +3,6 @@
 
 #include <GL4D/gl4dg.h>
 #include <GL4D/gl4dp.h>
-#include <GL4D/gl4df.h>
 #include <GL4D/gl4duw_SDL2.h>
 
 /* Global variables */
@@ -16,10 +15,15 @@ typedef struct {
 extern int _wW, _wH;
 extern int _xm, _ym;
 extern GLuint _pId;
+
 extern GLuint _sphere;
 extern GLuint _cube;
 extern GLuint _plane;
 extern GLuint _torus;
+extern GLuint _cylinder;
+
+/* Camera */
+
 extern vector_t _cam;
 extern vector_t _look_at;
 extern vector_t _up;
@@ -27,6 +31,8 @@ extern vector_t _right;
 extern GLfloat _pitch;
 extern GLfloat _yaw;
 extern GLfloat _roll;
+
+/* Vessel  */
 extern GLboolean _view_inside;
 
 #endif /* __COMMON_H__ */

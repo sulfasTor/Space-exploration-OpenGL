@@ -1,5 +1,4 @@
 #include "space.h"
-#define NSUM 25
 
 const GLint _space_radius = 70000;
 const GLint _planet_radius = 3000;

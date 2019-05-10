@@ -16,6 +16,13 @@ typedef struct {
   GLfloat health;
 } enemy_t;
 
+typedef struct {
+  GLfloat *deplacement;
+  GLuint size;
+  GLfloat range;
+} laser_beams_t;
+
+//void shoot ();
 void generate_vessels ();
 void draw_vessels ();
 void clean_vessel ();

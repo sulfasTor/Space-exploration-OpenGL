@@ -14,29 +14,34 @@ GLfloat _vessel_data[] =
    0.0, 0.0, 1.0,
    1.0, -1.0, 0.0,
    1.0, 0.0, 0.0,
-  }; 
+  };
 
 GLuint _vessel_vao_id = 0;
 GLuint _vessel_vbo_id = 0;
 GLuint _vessel_tex_id = 0;
 GLuint _enemy_vessel_tex_id = 0;
+GLuint _laser_beam_tex_id = 0;
 GLfloat angle = 0.0;
 GLfloat _surveillance_radius = 6000.0;
 
 static const GLuint _nb_enemies = 10;
 static enemy_t _enemies[10];
-
+//static GLuint _laser_beams_shot = 0.0;
+//static laser_beams_t _shots = {NULL, 0, 7000.0};
 
 void generate_vessel ();
 void generate_enemies ();
 void draw_vessel ();
 void draw_enemy_vessel (enemy_t);
 void draw_enemies ();
+void draw_laser_beam (GLfloat);
+void draw_laser_beams ();
 
 void generate_vessel ()
 {
   GLuint vessel_tex[] = {RGB (8, 16, 100)};
   GLuint enemy_vessel_tex[] = {RGB (255, 0, 0)};
+  //GLuint laser_beam_tex[] = {RGB (0, 255, 20)};
   
   glGenVertexArrays(1, &_vessel_vao_id);
   glBindVertexArray(_vessel_vao_id);
@@ -68,6 +73,16 @@ void generate_vessel ()
   glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, enemy_vessel_tex);
   glBindTexture(GL_TEXTURE_2D, 0);
 
+  /* /\* Laser beam *\/ */
+  /* glGenTextures (1, &_laser_beam_tex_id); */
+  /* glBindTexture (GL_TEXTURE_2D, _laser_beam_tex_id); */
+  /* glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); */
+  /* glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); */
+  /* glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); */
+  /* glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); */
+  /* glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT); */
+  /* glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, laser_beam_tex); */
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void generate_vessels ()
@@ -93,7 +108,56 @@ void draw_vessels ()
   draw_enemies ();
   if (!_view_inside)
     draw_vessel ();
+  //draw_laser_beams ();
 }
+
+/* void shoot () */
+/* { */
+/*   _laser_beams_shot++; */
+/*   printf ("%d\n", _laser_beams_shot); */
+/*   _shots.deplacement = realloc (_shots.deplacement, (_shots.size + 1) * sizeof (GLfloat)); */
+/*   _shots.deplacement[_shots.size] = 0.0; */
+/*   _shots.size++; */
+/* } */
+
+/* void draw_laser_beams () */
+/* { */
+/*   uint i; */
+/*   uint vanished_shots = 0; */
+  
+/*   for (i = 0; i < _laser_beams_shot; ++i) */
+/*     { */
+/*       if (_shots.deplacement[i] >= _shots.range) */
+/* 	{ */
+/* 	  vanished_shots++; */
+/* 	} */
+/*       else */
+/* 	{ */
+/* 	  _shots.deplacement[i] += 100.0; */
+/* 	  draw_laser_beam (_shots.deplacement[i]); */
+/* 	} */
+/*     } */
+/*   //_laser_beams_shot -= vanished_shots; */
+/* } */
+
+/* void draw_laser_beam (GLfloat deplacement) */
+/* { */
+/*   gl4duBindMatrix("modelMatrix"); */
+/*   gl4duPushMatrix(); { */
+/*     gl4duRotatef (90, 0, 0, 1); */
+/*     gl4duTranslatef (0, 0, deplacement); */
+/*     gl4duScalef(5.0, 10.0, 5.0); */
+/*     gl4duSendMatrices(); */
+/*   } gl4duPopMatrix(); */
+  
+/*   glDisable(GL_CULL_FACE); */
+/*   glDisable(GL_DEPTH_TEST); */
+/*   glActiveTexture(GL_TEXTURE0); */
+/*   glBindTexture(GL_TEXTURE_2D, _laser_beam_tex_id); */
+/*   glUniform1i(glGetUniformLocation(_pId, "tex"), 0); */
+/*   gl4dgDraw(_cylinder); */
+/*   gl4duBindMatrix(0); */
+/* } */
 
 void draw_vessel ()
 {
@@ -104,7 +168,6 @@ void draw_vessel ()
   vyaw = _yaw * 180/M_PI;
   vyaw = fabs(vyaw) >= 90.0 ? (signbit(vyaw) == 0 ? 1 : -1) * 89.0: vyaw;
 
-  //printf ("%f %f\n", vpitch, vyaw);
   gl4duBindMatrix("modelMatrix");
   /* Vessel */  
   gl4duBindMatrix("projectionMatrix");
@@ -134,6 +197,7 @@ void draw_vessel ()
   glBindVertexArray(_vessel_vao_id);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
   glBindVertexArray(0);
+  
   gl4duBindMatrix(0);
 }
 
@@ -177,6 +241,8 @@ void draw_enemy_vessel (const enemy_t enemy)
 
 void clean_vessel ()
 {
+  /* if (_shots.deplacement) */
+  /*   free (_shots.deplacement); */
   if(_vessel_vao_id)
     glDeleteVertexArrays(1, &_vessel_vao_id);
   if(_vessel_vbo_id)

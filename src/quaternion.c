@@ -19,17 +19,10 @@ quaternion_t get_quaternion_from_euler_angles (GLfloat pitch, GLfloat yaw, GLflo
   float y = yaw;
   float r = roll;
   
-  float sinp = sin(p);
-  float siny = sin(y);
-  float sinr = sin(r);
-  float cosp = cos(p);
-  float cosy = cos(y);
-  float cosr = cos(r);
-  
-  float qw = cosr * cosp * cosy + sinr * sinp * siny;
-  float qx = sinr * cosp * cosy - cosr * sinp * siny;
-  float qy = cosr * sinp * cosy + sinr * cosp * siny;
-  float qz = cosr * cosp * siny - sinr * sinp * cosy;
+  float qw = cos(r) * cos(p) * cos(y) + sin(r) * sin(p) * sin(y);
+  float qx = sin(r) * cos(p) * cos(y) - cos(r) * sin(p) * sin(y);
+  float qy = cos(r) * sin(p) * cos(y) + sin(r) * cos(p) * sin(y);
+  float qz = cos(r) * cos(p) * sin(y) - sin(r) * sin(p) * cos(y);
 
   quaternion_t new_rot = {qx, qy, qz, qw};
   normalize_quaternion (&new_rot);
