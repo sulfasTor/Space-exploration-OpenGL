@@ -1,20 +1,20 @@
 
 # Table of Contents
 
-1.  [Descriptif général et consigne](#org720cd80)
-2.  [Fonctionnalités attendues](#org2cab047)
-3.  [Description du code source](#orge8321f9)
-4.  [Le jeu](#orgf35894f)
-5.  [Le milieu](#orgcad75bd)
-6.  [La caméra](#orgfde637f)
-7.  [Gameplay](#orgdd98119)
-8.  [Compilation](#org5bc69ba)
-9.  [Captures d'écran](#org229b9bd)
-10. [Conclusion](#org46c7f98)
+1.  [Descriptif général et consigne](#org8cbe1a5)
+2.  [Fonctionnalités attendues](#org811e319)
+3.  [Description du code source](#orgca011e2)
+4.  [Le jeu](#org7d04fad)
+5.  [Le milieu](#org63bbc0e)
+6.  [La caméra](#orgf0a6283)
+7.  [Gameplay](#org3f02b63)
+8.  [Compilation](#org48c7f3d)
+9.  [Captures d'écran](#org6067263)
+10. [Conclusion](#orgf569ff7)
 
 
 
-<a id="org720cd80"></a>
+<a id="org8cbe1a5"></a>
 
 # Descriptif général et consigne
 
@@ -26,7 +26,7 @@ rencontrés mais le navire peut aussi bien être amené à combattre d’autres
 inspirer des exemples suivants : Elite (Amiga) / Frontier : Elite 2.
 
 
-<a id="org2cab047"></a>
+<a id="org811e319"></a>
 
 # Fonctionnalités attendues
 
@@ -52,7 +52,7 @@ inspirer des exemples suivants : Elite (Amiga) / Frontier : Elite 2.
 ## TODO Jouer en réseau
 
 
-<a id="orge8321f9"></a>
+<a id="orgca011e2"></a>
 
 # Description du code source
 
@@ -142,13 +142,13 @@ Fichier d'en tête de `vessel.c`.
 Gère l'animation et le jeu.
 
 
-<a id="orgf35894f"></a>
+<a id="org7d04fad"></a>
 
 # Le jeu
 
 Le jeu consiste simplement à explorer son environnement. Toutes les
-foncionnalités attendues n'ont pas pus être implementées pour manque
-de temps.
+foncionnalités attendues n'ont pas pus être implementées à cause du
+manque de temps.
 
 Le joueur est capable de bouger dans son milieu constitué d'un soleil
 et deux planètes dont un contient une lune.
@@ -162,7 +162,7 @@ Dans le programme aucune texture a été charge d'une image ni d'objet
 `.obj`. Tout est crée dans le programme.
 
 
-<a id="orgcad75bd"></a>
+<a id="org63bbc0e"></a>
 
 # Le milieu
 
@@ -171,21 +171,21 @@ l'espace et devant contient l'origine de la source de lumière
 spéculaire.
 
 Deux planètes jumelles sont fixes aussi dans l'espace. Ces planètes
-sont constitués de gaz ce qui permet de rentrer dans son centr.  La
-texture à été définit dans un tableau de couleurs.
+sont constitués de gaz ce qui permet de rentrer dans son centre. La
+texture à été définie dans un tableau de couleurs.
 
 Une planète contient une lune qui orbite en dehors et dans la planète.
 Elle contient aussi deux portails qui promènent des objets
 non-identifiables dans la planète.
 
-La deuxième planète est vide est plus froide à cause de sa distance du
+La deuxième planète est vide et plus froide à cause de sa distance du
 soleil.
 
 Dans la planètes ayant une lune des vaisseau ennemis se promènent dans
 des orbites de surveillance.
 
 
-<a id="orgfde637f"></a>
+<a id="orgf0a6283"></a>
 
 # La caméra
 
@@ -227,7 +227,7 @@ vectoriel et normalisés.
 
 ## Quaternion
 
-Cette caméra est utilisé pour montre un point de vu plus restraint qui
+Cette caméra est utilisé pour montrer un point de vu plus limité qui
 est celui du pilote. Cette caméra utilise outil mathématique du
 quaternion qui permet de garder des rotations. Un quaternion garde une
 rotation. Une variation de rotation changera le quaternion sans perdre
@@ -240,7 +240,7 @@ utile pour la transition entre la caméra classique et la caméra
 quaternion.
 
 
-<a id="orgdd98119"></a>
+<a id="org3f02b63"></a>
 
 # Gameplay
 
@@ -289,7 +289,7 @@ et donc non inclut dans le jeu.
     A : Change le point de vue.
 
 
-<a id="org5bc69ba"></a>
+<a id="org48c7f3d"></a>
 
 # Compilation
 
@@ -305,7 +305,7 @@ Pour executer le jeu il faut taper:
     ./game
 
 
-<a id="org229b9bd"></a>
+<a id="org6067263"></a>
 
 # Captures d'écran
 
@@ -314,7 +314,7 @@ Pour executer le jeu il faut taper:
 ![img](game-3.png)
 
 
-<a id="org46c7f98"></a>
+<a id="orgf569ff7"></a>
 
 # Conclusion
 
